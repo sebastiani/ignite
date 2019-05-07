@@ -141,8 +141,12 @@ class ModelCheckpoint(object):
             torch.save(obj, path)
         else:
             if not hasattr(obj, "state_dict") or not callable(obj.state_dict):
-                raise ValueError("Object should have `state_dict` method.")
-            torch.save(obj.state_dict(), path)
+                if not hasattr(obj, 'module') or not callable(obj.module):
+                    raise ValueError("Object should have `state_dict` method.")
+                else:
+                    torch.save(obj.module.state_dict(), path)
+            else:
+                torch.save(obj.state_dict(), path)
 
     def __call__(self, engine, to_save):
         if len(to_save) == 0:
